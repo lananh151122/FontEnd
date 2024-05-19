@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { PageContainer } from "@ant-design/pro-components";
 import { BreadcrumbProps, Button, Col, Input, InputNumber, Rate, Row, Tag, Typography } from "antd";
-import { Link, NavLink, useLocation, useParams } from "react-router-dom";
+import { Link, NavLink, useLocation, useNavigate, useParams } from "react-router-dom";
 import http from "../../utils/http";
 import { apiRoutes } from "../../routes/api";
 import { webRoutes } from "../../routes/web";
@@ -18,6 +18,7 @@ const { Text } = Typography;
 
 const ProductDetailView = () => {
     const { productId } = useParams();
+    const navigate = useNavigate();
     const location = useLocation();
     const [loading, setLoading] = useState<boolean>()
     const [product, setProduct] = useState<ProductDetailResponse>();
@@ -85,7 +86,7 @@ const ProductDetailView = () => {
         getPublicVoucher();
     }, [location]);
 
-    const addToCart = async () => {
+    const addToCart = async (isNavigate ?: boolean) => {
         try {
             if (!selectedStoreId) {
                 showNotification("Chưa chọn cửa hàng bán", NotificationType.ERROR)
@@ -97,7 +98,9 @@ const ProductDetailView = () => {
                 })
                 showNotification(res?.data?.message)
             }
-
+            if(isNavigate) {
+                navigate(webRoutes.cart);
+            }
         } catch (error) {
             handleErrorResponse(error);
         }
@@ -189,7 +192,7 @@ const ProductDetailView = () => {
                                 {voucher.isLimited == true ?
                                     <>
                                         <Tag key={voucher.voucherStoreId}
-                                            color="magenta"
+                                            color="gray"
                                             className="cursor-pointer"
                                         >
                                             <p className="pr-1">{voucher.value}{voucher.discountType == 'PERCENT' ? '%' : ''}</p>
@@ -345,7 +348,10 @@ const ProductDetailView = () => {
 
                                         <Row className="pt-5 flex justify-around">
                                             <Button type="default" icon={<BiCartAdd />} onClick={() => addToCart()}>Thêm vào giỏ hàng</Button>
-                                            <Button type="primary">Mua ngay</Button>
+                                            <Button type="primary"
+                                                onClick={() => {
+                                                    addToCart(true);
+                                                }}>Mua ngay</Button>
                                         </Row>
                                     </div>
                                 </div>
